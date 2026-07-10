@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "Pasarin API - Toko Online Sederhana",
+    "description": "Dokumentasi endpoint API untuk take-home test Fullstack Developer. Base URL default: http://localhost:8000/api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi@pasarin.test\",\n  \"phone\": \"081234567890\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@pasarin.test\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me (profil user login)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/me"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List Kategori (public)",
+          "request": { "method": "GET", "url": "{{base_url}}/categories" }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "List / Search Barang (public)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/products?q=beras&category_id=1"
+          }
+        },
+        {
+          "name": "Detail Barang (public)",
+          "request": { "method": "GET", "url": "{{base_url}}/products/1" }
+        },
+        {
+          "name": "Tambah Barang (Admin only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Beras Premium 5kg\",\n  \"description\": \"Beras kualitas terbaik\",\n  \"price\": 75000,\n  \"stock\": 40,\n  \"image\": \"dummy.png\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Barang (Admin only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/products/1",
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 80000,\n  \"stock\": 35\n}" }
+          }
+        },
+        {
+          "name": "Hapus Barang (Admin only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/products/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order & Checkout",
+      "item": [
+        {
+          "name": "Checkout (Customer only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/checkout",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    { \"product_id\": 1, \"qty\": 2 },\n    { \"product_id\": 3, \"qty\": 1 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Riwayat Order Saya (Customer only)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/my-orders"
+          }
+        },
+        {
+          "name": "Laporan Penjualan (Admin only)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/report/sales?status=pending&from=2025-07-01&to=2025-07-31",
+            "description": "Response berisi: summary (total_transaksi, total_pendapatan & total_terjual -- hanya dari order status completed, order_pending, total_stok -- real-time dari semua produk), top_products (6 produk terlaris dari order completed, untuk chart), dan orders (list order dengan pagination)."
+          }
+        },
+        {
+          "name": "Update Status Order / Konfirmasi (Admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/orders/1/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"completed\"\n}" },
+            "description": "Order baru selalu masuk dengan status 'pending' saat checkout. Admin mengonfirmasi order lewat endpoint ini dengan status 'completed' -- setelah itu baru dihitung ke total pendapatan & barang terjual di laporan penjualan (GET /api/report/sales). Status lain yang valid: pending, paid, completed, cancelled."
+          }
+        }
+      ]
+    }
+  ]
+}
